@@ -132,8 +132,9 @@ function commandInit() {
         echoError "current user is not root user "
         exit
     fi
-    sudo apt-get install -y curl lrzsz unzip procps
+    sudo apt-get install -y curl lrzsz unzip procps nfs-common
 }
+
 
 
 # 安装k3s
