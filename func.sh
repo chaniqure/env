@@ -98,7 +98,7 @@ function addUserToDocker(){
         echoError "current user is not root user "
         exit
     fi
-    sudo gpasswd -a $1 docker    
+    gpasswd -a $1 docker    
     newgrp docker   
     systemctl restart docker
 }
@@ -120,7 +120,7 @@ function changeDockerMirror(){
         echoError "current user is not root user "
         exit
     fi
-    sudo echo -e "{
+    echo -e "{
     \"registry-mirrors\":[\"http://hub-mirror.c.163.com\"]\n}" > /etc/docker/daemon.json
     systemctl restart docker
 }
@@ -132,9 +132,8 @@ function commandInit() {
         echoError "current user is not root user "
         exit
     fi
-    sudo apt-get install -y curl lrzsz unzip procps nfs-common
+    apt-get install -y curl lrzsz unzip procps nfs-common vim socat conntrack ebtables ipset
 }
-
 
 
 # 安装k3s
