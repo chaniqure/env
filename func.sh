@@ -132,7 +132,7 @@ function commandInit() {
         echoError "current user is not root user "
         exit
     fi
-    apt-get install -y curl lrzsz unzip procps nfs-common vim socat conntrack ebtables ipset
+    apt-get install -y curl lrzsz unzip procps nfs-common vim socat conntrack ebtables ipset sudo
 }
 
 
