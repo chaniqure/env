@@ -111,6 +111,7 @@ function dockerInstall(){
         exit
     fi
     curl -fsSL https://get.docker.com | bash -s docker --mirror Aliyun
+    # curl -sSL https://get.daocloud.io/docker | sh
 }
 
 # 更新docker仓库
