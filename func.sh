@@ -176,5 +176,5 @@ case "$1" in
         k3sInstall
         ;;
     *)
-        echoError 'command does not find, available command: dockerInstall|addUserToDocker|changeDockerMirror|commandInit|k3sInstall'
+        echoError 'command does not find, available command: dockerInstall|addUserToDocker|changeDockerMirror|commandInit|k3sInstall|dockerComposeInstall'
 esac
