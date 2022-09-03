@@ -192,6 +192,19 @@ EOF`
     fi
 }
 
+function permitDockerRemoteConnect() {
+    FILE="/lib/systemd/system/docker.service"
+    RESULT=`sed -n '/ExecStart/p' $FILE | grep 'tcp://0.0.0.0:2375' | wc -l`
+    if [[ $RESULT > 0 ]]; then
+        echoError '已开启docker远程连接'
+    else
+        backup $FILE
+        `sed -r -i 's#(^ExecStart.*sock$)#\1 -H tcp://0.0.0.0:2375#g' $FILE`
+        if [[ $? = 0 ]]; then
+            echoInfo '开启docker远程连接操作成功'
+        fi
+    fi
+}
 
 function comand() {
     while :; do echo
@@ -207,6 +220,7 @@ function comand() {
         echo -e "\t4. 安装docker-compose"
         echo -e "\t5. 添加用户到docker"
         echo -e "\t6. root开启远程访问"
+        echo -e "\t7. docker开启远程连接"
         echo -e "\t9. 退出"
         read -e -p "请输入操作编号：" option
         case "$option" in
@@ -228,6 +242,9 @@ function comand() {
             ;;
         6)
             permitRootRemoteLogin
+            ;;
+        7)
+            permitDockerRemoteConnect
             ;;
         9)
             clear
