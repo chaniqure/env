@@ -184,8 +184,8 @@ function permitRootRemoteLogin() {
 
 PermitRootLogin yes
 EOF`
-        echo "修改文件结果:$?"
-        if [[ $? = 0 ]]; then
+        RESULT=`cat $FILE | grep 'PermitRootLogin yes' | wc -l`
+        if [[ $RESULT > 0 ]]; then
             systemctl restart sshd
             echoInfo '开启root远程登录操作成功'
         fi
@@ -199,10 +199,14 @@ function permitDockerRemoteConnect() {
         echoError '已开启docker远程连接'
     else
         backup $FILE
-        `sed -r -i 's#(^ExecStart.*sock$)#\1 -H tcp://0.0.0.0:2375#g' $FILE`
-        if [[ $? = 0 ]]; then
+        `sed -r -i 's#(^ExecStart.*sock)#\1 -H tcp://0.0.0.0:2375#g' $FILE`
+        RESULT=`sed -n '/ExecStart/p' $FILE | grep 'tcp://0.0.0.0:2375' | wc -l`
+        if [[ $RESULT > 0 ]]; then
+            systemctl daemon-reload
             echoInfo '开启docker远程连接操作成功'
-        fi
+        else
+           echoError '修改文件失败'
+        fi 
     fi
 }
 
