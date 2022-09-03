@@ -206,6 +206,42 @@ function permitDockerRemoteConnect() {
     fi
 }
 
+
+function addSudoer() {
+    mustRootUser
+    FILE='/etc/sudoers.d/custom'
+    if [ ! -f $FILE ]; then
+        touch $FILE
+    fi
+    readInput '请输入用户名：'
+    COUNT=`cat $FILE | grep $RESULT | wc -l`
+    if [[ $COUNT > 0 ]]; then
+        echoError "已将 $RESULT 加入超级管理员"
+    else
+        `cat >> $FILE <<"EOF"
+TEMP    ALL=(ALL:ALL) ALL
+EOF` | sed -r -i "s#TEMP#$RESULT#" custom
+    fi
+    
+    # `sed -i "$a $RESULT    ALL=(ALL:ALL) ALL" $FILE`
+}
+
+function handVimCopy() {
+    FILE="$HOME/.vimrc"
+    if [ ! -f $FILE ]; then
+        touch $FILE
+    fi
+    `cat >> $FILE <<'EOF' 
+if has("syntax")  
+  syntax on
+endif
+EOF`
+    if [[ $? = 0 ]]; then
+        echoInfo '处理vim拷贝问题成功'
+    fi
+
+}
+
 function comand() {
     while :; do echo
         printf "
@@ -221,7 +257,9 @@ function comand() {
         echo -e "\t5. 添加用户到docker"
         echo -e "\t6. root开启远程访问"
         echo -e "\t7. docker开启远程连接"
-        echo -e "\t9. 退出"
+        echo -e "\t8. 添加sudo用户"
+        echo -e "\t9. 处理vim拷贝问题"
+        echo -e "\t99. 退出"
         read -e -p "请输入操作编号：" option
         case "$option" in
         1)
@@ -246,7 +284,13 @@ function comand() {
         7)
             permitDockerRemoteConnect
             ;;
+        8)
+            addSudoer
+            ;;
         9)
+            handVimCopy
+            ;;
+        99)
             clear
             break
             ;;
@@ -312,14 +356,7 @@ GATEWAY=192.168.0.1  #(设置本机连接的网关的IP地址。)
     fi
 }
 
-function handVimCopy() {
-    echoInfo "
-编辑 $HOME/.vimrc ， 加入以下配置
-if has("syntax")  
-  syntax on
-endif
-    "
-}
+
 
 
 
@@ -332,26 +369,11 @@ function tips() {
     "
         echo -e '请选择操作'
         echo -e "\t1. 更改系统ip"
-        echo -e "\t2. 处理vim是拷贝问题"
-        echo -e "\t3. 添加sudo用户"
-        echo -e "\t4. docker开启远程连接"
         echo -e "\t9. 退出"
         read -e -p "请输入操作编号：" option
         case "$option" in
         1)
             showChangeIpTips
-            ;;
-        2)
-            handVimCopy
-            ;;
-        3)
-            echoInfo "编辑 /etc/sudoers 文件"
-            ;;
-        4)
-            echoInfo "
-编辑 /lib/systemd/system/docker.service ， 在 ExecStart 最后加入：-H tcp://0.0.0.0:2375"
-            ;;
-        9)
             clear
             break
             ;;
