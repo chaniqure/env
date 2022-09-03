@@ -218,6 +218,9 @@ function addSudoer() {
     if [[ $COUNT > 0 ]]; then
         echoError "已将 $RESULT 加入超级管理员"
     else
+        if [ ! -f $FILE ]; then
+            touch $FILE
+        fi
         `cat >> $FILE <<"EOF"
 TEMP    ALL=(ALL:ALL) ALL
 EOF` | sed -r -i "s#TEMP#$RESULT#" custom
