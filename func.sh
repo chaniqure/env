@@ -119,8 +119,8 @@ function dockerComposeInstall(){
         echoError "current user is not root user "
         exit
     fi
-    curl -L "https://github.com/docker/compose/releases/download/1.23.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose & chmod +x /usr/local/bin/docker-compose
-    # curl -sSL https://get.daocloud.io/docker | sh
+    # curl -L "https://github.com/docker/compose/releases/download/1.23.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose & chmod +x /usr/local/bin/docker-compose
+    curl -sSL https://get.daocloud.io/docker | sh
 }
 # 更新docker仓库
 function changeDockerMirror(){
