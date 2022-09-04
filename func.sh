@@ -123,14 +123,14 @@ function dockerComposeInstall(){
 # 更新docker仓库
 function changeDockerMirror(){
     mustRootUser
-    start=$(ls -l "/etc/docker/daemon.json" | wc -l)
-    if [ $start -gt 0 ]; then
+    FILE="/etc/docker/daemon.json"
+    if [ -f $FILE ]; then
         echoError "docker配置文件已存在，停止改变docker镜像中心操作"
-        exit
+    else
+        echo -e "{
+        \"registry-mirrors\":[\"http://hub-mirror.c.163.com\"]\n}" > /etc/docker/daemon.json
+        systemctl restart docker
     fi
-    echo -e "{
-    \"registry-mirrors\":[\"http://hub-mirror.c.163.com\"]\n}" > /etc/docker/daemon.json
-    systemctl restart docker
 }
 
 # 安装常用的命令
@@ -174,18 +174,14 @@ function backup() {
 }
 
 function permitRootRemoteLogin() {
+    mustRootUser
     FILE="/etc/ssh/sshd_config"
-    RESULT=`cat $FILE | grep 'PermitRootLogin yes' | wc -l`
-    if [[ $RESULT > 0 ]]; then
+    if [[ `cat $FILE | grep 'PermitRootLogin yes' | wc -l` > 0 ]]; then
         echoError '已开启root远程登录'
     else
         backup $FILE
-        `cat >> $FILE <<'EOF' 
-
-PermitRootLogin yes
-EOF`
-        RESULT=`cat $FILE | grep 'PermitRootLogin yes' | wc -l`
-        if [[ $RESULT > 0 ]]; then
+        sed -i '$a PermitRootLogin yes' $FILE
+        if [[ `cat $FILE | grep 'PermitRootLogin yes' | wc -l` > 0 ]]; then
             systemctl restart sshd
             echoInfo '开启root远程登录操作成功'
         fi
@@ -193,16 +189,15 @@ EOF`
 }
 
 function permitDockerRemoteConnect() {
+    mustRootUser
     FILE="/lib/systemd/system/docker.service"
-    RESULT=`sed -n '/ExecStart/p' $FILE | grep 'tcp://0.0.0.0:2375' | wc -l`
-    if [[ $RESULT > 0 ]]; then
+    if [[ `sed -n '/ExecStart/p' $FILE | grep 'tcp://0.0.0.0:2375' | wc -l` > 0 ]]; then
         echoError '已开启docker远程连接'
     else
         backup $FILE
-        `sed -r -i 's#(^ExecStart.*sock)#\1 -H tcp://0.0.0.0:2375#g' $FILE`
-        RESULT=`sed -n '/ExecStart/p' $FILE | grep 'tcp://0.0.0.0:2375' | wc -l`
-        if [[ $RESULT > 0 ]]; then
-            systemctl daemon-reload
+        sed -r -i 's#(^ExecStart.*sock)#\1 -H tcp://0.0.0.0:2375#g' $FILE
+        if [[ `sed -n '/ExecStart/p' $FILE | grep 'tcp://0.0.0.0:2375' | wc -l` > 0 ]]; then
+            #systemctl daemon-reload
             echoInfo '开启docker远程连接操作成功'
         else
            echoError '修改文件失败'
@@ -218,35 +213,100 @@ function addSudoer() {
         touch $FILE
     fi
     readInput '请输入用户名：'
-    COUNT=`cat $FILE | grep $RESULT | wc -l`
-    if [[ $COUNT > 0 ]]; then
+    if [[ `cat $FILE | grep $RESULT | wc -l` > 0 ]]; then
         echoError "已将 $RESULT 加入超级管理员"
     else
-        if [ ! -f $FILE ]; then
-            touch $FILE
+        cat >> $FILE <<EOF
+$RESULT    ALL=(ALL:ALL) ALL
+EOF
+        if [[ `cat $FILE | grep $RESULT | wc -l` > 0 ]]; then
+            echoInfo "添加 $RESULT 进入超级管理员成功"
         fi
-        `cat >> $FILE <<"EOF"
-TEMP    ALL=(ALL:ALL) ALL
-EOF` | sed -r -i "s#TEMP#$RESULT#" custom
     fi
     
-    # `sed -i "$a $RESULT    ALL=(ALL:ALL) ALL" $FILE`
 }
+
+#         `cat >> $FILE <<"EOF"
+# TEMP    ALL=(ALL:ALL) ALL
+# EOF` | sed -r -i "s#TEMP#$RESULT#" custom
 
 function handVimCopy() {
     FILE="$HOME/.vimrc"
-    if [ ! -f $FILE ]; then
+    if [ -f $FILE ]; then
+        echoError "已配置vim拷贝问题"
+    else
         touch $FILE
-    fi
-    `cat >> $FILE <<'EOF' 
+        cat >> $FILE <<EOF
 if has("syntax")  
   syntax on
 endif
-EOF`
-    if [[ $? = 0 ]]; then
-        echoInfo '处理vim拷贝问题成功'
+EOF
+        if [ -f $FILE ]; then
+            echoInfo '处理vim拷贝问题成功'
+        fi
     fi
+}
 
+
+function processAlias() {
+    FILE='.bashrc'
+    cd ~
+    if [ ! -f $FILE ]; then
+        touch $FILE
+    else
+        declare -A aliasMap
+        # 镜像对应的开放的端口
+        aliasMap["la="]='alias la="ls -al --color=auto"'
+        aliasMap["ll="]='alias ll="ls -l --color=auto"'
+        aliasMap["dockerc"]='alias dockerc="docker-compose"'
+        aliasMap["dockerma"]='alias dockerma="docker rm -v $(docker ps -aq -f status=exited)"'
+        aliasMap["dockerin"]='function dockerin() {
+    docker exec -it $1 /bin/bash
+}'
+        aliasMap["k="]='alias k="kubectl"'
+        aliasMap["kdp="]='alias kdp="kubectl describe po"'
+        aliasMap["kds="]='alias kds="kubectl describe svc"'
+        aliasMap["kcd="]='alias kcd="kubectl config set-context --current --namespace"'
+        aliasMap["kin"]='function kin() {
+    kubectl exec -it $1 -- /bin/sh
+}'      
+        for key in ${!aliasMap[@]}
+        do
+            if [[ `sed 's/^[ \t]*//g' $FILE | sed -n '/^[^#]/p' | grep $key | wc -l` > 0 ]];then
+                    echoError "${aliasMap[$key]} 已存在"
+            else
+                if [ "$key" = "la=" ] || [ "$key" = "ll=" ];then
+                   `cat >> $FILE <<EOF
+${aliasMap[$key]}
+EOF`
+                else
+                    if [[ `echo "${aliasMap[$key]}" | grep "docker" | wc -l` > 0 ]];then
+                        if [[ `command -v docker | wc -l` = 0 ]];then
+                            echoError "docker运行环境不存在，相关别名设置跳过"
+                        else
+                            `cat >> $FILE <<EOF
+${aliasMap[$key]}
+EOF`
+                        fi
+                    elif [[ `echo "${aliasMap[$key]}" | grep "kubectl" | wc -l` > 0 ]]; then
+                        #statements
+                        if [[ `command -v kubectl | wc -l` = 0 ]];then
+                            echoError "kubenetes运行环境不存在，相关别名设置跳过"
+                        else
+                            `cat >> $FILE <<EOF
+${aliasMap[$key]}
+EOF`
+                        fi
+                    fi
+                fi
+                # 先替换空格和制表符，然后在判断是否以#开头
+                if [[ `sed 's/^[ \t]*//g' $FILE | sed -n '/^[^#]/p' | grep $key | wc -l` > 0 ]];then
+                    echoInfo "${aliasMap[$key]} 添加成功"
+                fi
+            fi
+        done
+    fi
+    source .bashrc
 }
 
 function comand() {
@@ -255,7 +315,7 @@ function comand() {
 #######################################################################
                                自用安装工具                          
 #######################################################################
-    "
+"
         echo -e '请选择操作'
         echo -e "\t1. 系统初始化（安装常用命令，更改系统时区）"
         echo -e "\t2. 安装docker"
@@ -266,6 +326,7 @@ function comand() {
         echo -e "\t7. docker开启远程连接"
         echo -e "\t8. 添加sudo用户"
         echo -e "\t9. 处理vim拷贝问题"
+        echo -e "\t10. 处理别名问题"
         echo -e "\t99. 退出"
         read -e -p "请输入操作编号：" option
         case "$option" in
@@ -296,6 +357,9 @@ function comand() {
             ;;
         9)
             handVimCopy
+            ;;
+        10)
+            processAlias
             ;;
         99)
             clear
@@ -358,8 +422,6 @@ GATEWAY=192.168.0.1  #(设置本机连接的网关的IP地址。)
 
     "
         fi
-
-
     fi
 }
 
@@ -373,7 +435,7 @@ function tips() {
 #######################################################################
                                帮助                          
 #######################################################################
-    "
+"
         echo -e '请选择操作'
         echo -e "\t1. 更改系统ip"
         echo -e "\t9. 退出"
@@ -381,6 +443,8 @@ function tips() {
         case "$option" in
         1)
             showChangeIpTips
+            ;;
+        9)
             clear
             break
             ;;
@@ -393,7 +457,7 @@ function tips() {
 
 while :; do echo
     echo '请选择操作:'
-    echo -e "\t1. 安装"
+    echo -e "\t1. 操作"
     echo -e "\t2. 帮助"
     read -e -p "请输入操作编号：" option
     case "$option" in
