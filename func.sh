@@ -267,6 +267,7 @@ function processAlias() {
         aliasMap["kdp="]='alias kdp="kubectl describe po"'
         aliasMap["kds="]='alias kds="kubectl describe svc"'
         aliasMap["kcd="]='alias kcd="kubectl config set-context --current --namespace"'
+        aliasMap["kt="]='"kubectl -n kubernetes-dashboard get secret $(kubectl -n kubernetes-dashboard get sa/admin-user -o jsonpath=\"{.secrets[0].name}\") -o go-template=\"{{.data.token | base64decode}}\""'
         aliasMap["kin"]='function kin() {
     kubectl exec -it $1 -- /bin/sh
 }'      
