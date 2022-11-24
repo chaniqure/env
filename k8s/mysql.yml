@@ -1,0 +1,98 @@
+kind: StatefulSet
+apiVersion: apps/v1
+metadata:
+  name: mysql
+  namespace: user
+  labels:
+    app: mysql
+  annotations:
+    kubesphere.io/creator: admin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: mysql
+      annotations:
+        kubesphere.io/creator: admin
+    spec:
+      volumes:
+        - name: data-path
+          hostPath:
+            path: /mnt/mysql
+            type: ''
+      containers:
+        - name: mysql
+          image: mysql/mysql-server
+          ports:
+            - name: tcp-3306
+              containerPort: 3306
+              protocol: TCP
+            - name: tcp-33060
+              containerPort: 33060
+              protocol: TCP
+            - name: tcp-33061
+              containerPort: 33061
+              protocol: TCP
+          env:
+            - name: TZ
+              value: Asia/Shanghai
+            - name: LANG
+              value: en_US.UTF-8
+            - name: MYSQL_ROOT_PASSWORD
+              value: root
+            - name: MYSQL_USER
+              value: test
+            - name: MYSQL_PASSWORD
+              value: test123456
+          resources: {}
+          volumeMounts:
+            - name: data-path
+              mountPath: /var/lib/mysql
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          imagePullPolicy: IfNotPresent
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      serviceAccountName: default
+      serviceAccount: default
+      securityContext: {}
+      schedulerName: default-scheduler
+  serviceName: mysql
+  podManagementPolicy: OrderedReady
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      partition: 0
+  revisionHistoryLimit: 10
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: mysql
+  namespace: user
+  labels:
+    app: mysql
+  annotations:
+    kubesphere.io/creator: admin
+spec:
+  ports:
+    - name: http-3306
+      protocol: TCP
+      port: 3306
+      targetPort: 3306
+      nodePort: 3306
+  selector:
+    app: mysql
+  type: NodePort
+  sessionAffinity: None
+  externalTrafficPolicy: Cluster
+  ipFamilies:
+    - IPv4
+  ipFamilyPolicy: SingleStack
+  internalTrafficPolicy: Cluster
