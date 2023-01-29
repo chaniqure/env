@@ -1,0 +1,111 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: converter
+  namespace: user
+  labels:
+    app: converter
+  annotations:
+    deployment.kubernetes.io/revision: '8'
+    kubesphere.io/creator: admin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: converter
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: converter
+      annotations:
+        kubesphere.io/creator: admin
+        logging.kubesphere.io/logsidecar-config: '{}'
+    spec:
+      volumes:
+        - name: volume-3k8sgj
+          configMap:
+            name: converter
+            items:
+              - key: config.ini
+                path: config.ini
+            defaultMode: 420
+        - name: volume-nyaf7o
+          configMap:
+            name: converter
+            items:
+              - key: clash.yml
+                path: clash.yml
+            defaultMode: 420
+        - name: volume-cp3si6
+          configMap:
+            name: converter
+            items:
+              - key: rule.yml
+                path: rule.yml
+            defaultMode: 420
+        - name: volume-d0topy
+          configMap:
+            name: converter
+            items:
+              - key: quanx.conf
+                path: quanx.conf
+            defaultMode: 420
+        - name: volume-nj8ncr
+          configMap:
+            name: converter
+            items:
+              - key: self.yml
+                path: self.yml
+            defaultMode: 420
+      containers:
+        - name: converter
+          image: 'docker.io/chaniqure/converter:1.1'
+          ports:
+            - name: tcp-25500
+              containerPort: 25500
+              protocol: TCP
+            - name: tcp-5000
+              containerPort: 5000
+              protocol: TCP
+          resources: {}
+          volumeMounts:
+            - name: volume-3k8sgj
+              readOnly: true
+              mountPath: /app/config.ini
+              subPath: config.ini
+            - name: volume-nyaf7o
+              readOnly: true
+              mountPath: /app/pkg/conf/subconverter_config/clash.yml
+              subPath: clash.yml
+            - name: volume-cp3si6
+              readOnly: true
+              mountPath: /app/pkg/conf/rule.yml
+              subPath: rule.yml
+            - name: volume-d0topy
+              readOnly: true
+              mountPath: /app/pkg/conf/subconverter_config/quanx.conf
+              subPath: quanx.conf
+            - name: volume-nj8ncr
+              readOnly: true
+              mountPath: /app/pkg/conf/subconverter_config/self.yml
+              subPath: self.yml
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          imagePullPolicy: IfNotPresent
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      serviceAccountName: default
+      serviceAccount: default
+      securityContext: {}
+      imagePullSecrets:
+        - name: dockerhub
+      schedulerName: default-scheduler
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
+  revisionHistoryLimit: 10
+  progressDeadlineSeconds: 600
