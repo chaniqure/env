@@ -5,9 +5,6 @@ metadata:
   namespace: user
   labels:
     app: converter
-  annotations:
-    deployment.kubernetes.io/revision: '8'
-    kubesphere.io/creator: admin
 spec:
   replicas: 1
   selector:
@@ -15,12 +12,8 @@ spec:
       app: converter
   template:
     metadata:
-      creationTimestamp: null
       labels:
         app: converter
-      annotations:
-        kubesphere.io/creator: admin
-        logging.kubesphere.io/logsidecar-config: '{}'
     spec:
       volumes:
         - name: volume-3k8sgj
@@ -94,14 +87,7 @@ spec:
           terminationMessagePolicy: File
           imagePullPolicy: IfNotPresent
       restartPolicy: Always
-      terminationGracePeriodSeconds: 30
-      dnsPolicy: ClusterFirst
-      serviceAccountName: default
-      serviceAccount: default
-      securityContext: {}
-      imagePullSecrets:
-        - name: dockerhub
-      schedulerName: default-scheduler
+      
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -109,3 +95,27 @@ spec:
       maxSurge: 25%
   revisionHistoryLimit: 10
   progressDeadlineSeconds: 600
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: converter
+  namespace: user
+  labels:
+    app: converter
+spec:
+  ports:
+    - name: http-5000
+      protocol: TCP
+      port: 5000
+      targetPort: 5000
+      nodePort: 5000
+    - name: http-25500
+      protocol: TCP
+      port: 25500
+      targetPort: 25500
+      nodePort: 25500
+  selector:
+    app: converter
+  type: NodePort
+
