@@ -1,0 +1,16 @@
+{
+    "settings": [
+        {
+            "provider": "namecheap",
+            "domain": "itplayer.site",
+            "host": "nat",
+            "password": ""
+        },
+        {
+            "provider": "namecheap",
+            "domain": "itplayer.site",
+            "host": "emby",
+            "password": ""
+        }
+    ]
+}
