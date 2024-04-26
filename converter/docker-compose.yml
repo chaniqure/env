@@ -1,0 +1,16 @@
+version: '3.1'
+services:
+  converter:
+    image: chaniqure/converter:1.2
+    container_name: converter
+    restart: always
+    ports:
+      - 5000:5000
+      - 25500:25500
+    volumes:
+      - ./conf/config.ini:/app/config.ini
+      - ./conf/clash.yml:/app/pkg/conf/subconverter_config/clash.yml
+      - ./conf/surge.yml:/app/pkg/conf/subconverter_config/surge.yml
+      - ./conf/ytoo.yml:/app/pkg/conf/subconverter_config/ytoo.yml
+      - ./conf/rule.yml:/app/pkg/conf/rule.yml
+      - ./conf/all_base.tpl:/app/subconverter/base/all_base.tpl

@@ -1,0 +1,12 @@
+[common]
+#服务器ip
+server_addr = 
+server_port = 
+token = 
+
+[]
+name = 
+type = "http"
+local_ip = ]
+local_port = 
+subdomain=

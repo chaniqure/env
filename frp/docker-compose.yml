@@ -1,0 +1,8 @@
+version: '3'
+services:
+  frpc:
+    image: snowdreamtech/frpc
+    volumes:
+      - ./frpc.toml:/etc/frp/frpc.toml
+    container_name: frpc
+    network_mode: host

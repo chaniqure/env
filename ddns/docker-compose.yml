@@ -1,0 +1,21 @@
+version: '3.1'
+services:
+  ddns:
+    image: qmcgaw/ddns-updater
+    container_name: ddns
+    restart: always
+    environment:
+      PUBLICIP_FETCHERS: http
+      PUBLICIP_HTTP_PROVIDERS: ifconfig
+      # PERIOD: 10m
+      # UPDATE_COOLDOWN_PERIOD: 10m
+      PUBLICIPV4_HTTP_PROVIDERS: ipify
+      PUBLICIPV6_HTTP_PROVIDERS: ipify
+      PUBLICIP_DNS_PROVIDERS: cloudflare
+    ports:
+      - 8000:8000/tcp
+    volumes:
+      - ./data:/updater/data/
+    networks:
+      - self
+ 

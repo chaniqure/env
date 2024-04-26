@@ -1,0 +1,39 @@
+version: "3.3"
+
+services:
+  mysql_wordpress:
+    image: mysql:5.7
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+    restart: always
+    container_name: mysql_wordpress
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+
+  wordpress:
+    depends_on:
+      - mysql_wordpress
+    image: wordpress:latest
+    container_name: wordpress
+    volumes:
+      - ./data/websites/wordpress:/var/www/html
+    ports:
+      - "8081:80"
+    restart: always
+    environment:
+      WORDPRESS_DB_HOST: mysql_wordpress
+      WORDPRESS_DB_USER: 
+      WORDPRESS_DB_PASSWORD: 
+      WORDPRESS_DB_NAME: 
+  frpc_wordpress:
+    image: snowdreamtech/frpc
+    volumes:
+      - ./frpc.toml:/etc/frp/frpc.toml
+    container_name: frpc_wordpress
+    network_mode: host
+    restart: always
+volumes:
+  db_data: {}
+  wordpress_data: {}

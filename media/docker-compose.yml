@@ -1,0 +1,77 @@
+version: '3.3'
+services:
+  nginx_emby:
+    image: nginx:alpine
+    container_name: nginx_emby
+    ports:
+      - 8097:80
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/embyCache:/var/cache/nginx/emby
+    restart: unless-stopped
+  emby:
+    container_name: emby
+    ports:
+      - 8096:8096
+      - 8920:8920
+    volumes:
+      - ./emby/config:/config
+      # - /mnt:/mnt
+      - ~/emby:/mnt/emby
+    environment:
+      - TZ=Asia/Shanghai
+      - UID=0
+      - GID=0
+      - GIDLIST=0
+    devices:
+      - /dev/dri:/dev/dri
+    restart: unless-stopped
+    image: lovechen/embyserver:latest
+  auto_symlink:
+    container_name: auto_symlink
+    environment:
+      - TZ=Asia/Shanghai
+    volumes:
+      - /mnt/alist:/mnt/alist:rslave
+      #- /mnt/alist/阿里云盘:/mnt/alist/阿里云盘:rslave
+      - /root/emby:/Media
+      - ./auto_symlink:/app/config
+    ports:
+      - 8095:8095
+    restart: unless-stopped
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+    image: shenxianmq/auto_symlink:latest
+  alist:
+   image: 'xhofe/alist:latest'
+   container_name: alist
+   volumes:
+     - ./alist:/opt/alist/data
+   ports:
+       - '5244:5244'
+   environment:
+     - PUID=0
+     - PGID=0
+     - UMASK=022
+   restart: unless-stopped
+    # docker exec -it alist ./alist admin set NEW_PASSWORD
+  # rclone:
+  #   image: rclone/rclone
+  #   container_name: rclone
+  #   restart: unless-stopped
+  #   volumes:
+  #     - ./rclone:/config/rclone
+  #     - /mnt/alist:/mnt/alist:shared
+  #   devices:
+  #     - /dev/fuse
+  #   cap_add:
+  #     - SYS_ADMIN
+  #   security_opt:
+  #     - apparmor:unconfined
+  #   entrypoint:
+  #     - /bin/sh
+  #   command: -c "/config/rclone/script.sh"
+  

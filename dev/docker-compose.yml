@@ -5,17 +5,19 @@ services:
     image: mysql/mysql-server # 用于m1的mac
     container_name: mysql
     command: --default-authentication-plugin=mysql_native_password
-    # restart: always
+    restart: always
     environment:
       TZ: Asia/Shanghai
       LANG: en_US.UTF-8
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_USER: test
-      MYSQL_PASSWORD: test123456
+      MYSQL_ROOT_PASSWORD: 
+      MYSQL_USER: 
+      MYSQL_PASSWORD: 
     ports:
       - 3306:3306
     volumes:
-      - ~/env/docker/data/mysql:/var/lib/mysql
+      - ./data/mysql:/var/lib/mysql
+    networks:
+      - dev
   # rabbitmq:
   #   image: rabbitmq:3-management
   #   container_name: rabbitmq
@@ -24,40 +26,72 @@ services:
   #     - 15672:15672
   #     - 5672:5672
   #   environment:
-  #     - RABBITMQ_DEFAULT_USER=cc
-  #     - RABBITMQ_DEFAULT_PASS=cc123456
+  #     - RABBITMQ_DEFAULT_USER=
+  #     - RABBITMQ_DEFAULT_PASS=
   mongo:
     container_name: mongo
     image: mongo:4.4.12
     command: -f /etc/mongo/mongod.conf
+    restart: always
     ports:
       - 27017:27017
     volumes:
-      - ~/env/docker/conf/mongod.conf:/etc/mongo/mongod.conf
-      - ~/env/docker/data/mongo:/data/db
+      - ./conf/mongod.conf:/etc/mongo/mongod.conf
+      - ./data/mongo:/data/db
     environment:
-      MONGO_INITDB_DATABASE: test
-      MONGO_INITDB_ROOT_USERNAME: test
-      MONGO_INITDB_ROOT_PASSWORD: test123456
-  postgres:
-    container_name: postgres
-    image: postgres
-    environment:
-      POSTGRES_USER: test
-      POSTGRES_PASSWORD: test123456
-    ports:
-      - 5432:5432
-    volumes:
-      - ~/env/docker/data/postgres:/var/lib/postgresql/data
+      MONGO_INITDB_DATABASE: admin
+      MONGO_INITDB_ROOT_USERNAME: 
+      MONGO_INITDB_ROOT_PASSWORD: 
+    networks:
+      - dev
+  # postgres:
+  #   container_name: postgres
+  #   image: postgres
+  #   environment:
+  #     POSTGRES_USER: test
+  #     POSTGRES_PASSWORD: test123456
+  #   ports:
+  #     - 5432:5432
+  #   volumes:
+  #     - ~/env/docker/data/postgres:/var/lib/postgresql/data
   redis:
     container_name: redis
     image: redis
     # restart: always
     command: /usr/local/redis/redis.conf
+    restart: always
     volumes:
       - ~/env/docker/conf/redis.conf:/usr/local/redis/redis.conf
     ports:
       - 6379:6379
+    networks:
+      - dev
+  nacos:
+    container_name: nacos
+    image: nacos/nacos-server
+    ports:
+      - 8848:8848
+      - 9848:9848
+    env_file:
+      - ./conf/nacos-standlone-mysql.env
+    # volumes:
+    #   - ./standalone-logs/:/home/nacos/logs
+    # environment:
+    #   - MODE=standalone
+    #   - PREFER_HOST_MODE=hostname
+    #   - NACOS_SERVER_IP=10.1.1.110
+    #   - NACOS_SERVER_PORT=8848
+    #   - SPRING_DATASOURCE_PLATFORM=mysql
+    #   - MYSQL_SERVICE_HOST=10.1.1.110
+    #   - MYSQL_SERVICE_PORT=3306
+    #   - MYSQL_SERVICE_USER=cc
+    #   - MYSQL_SERVICE_PASSWORD=test@123.qq
+    #   - MYSQL_SERVICE_DB_NAME=nacos
+    # volumes:
+    #   - /home/cc/env/docker/conf/nacos_application.properties:/home/nacos/conf/application.properties
+    #   - ./nacos_log:/home/nacos/logs
+    # networks:
+    #   - dev
   # zookeeper:
   #   container_name: zookeeper
   #   image: wurstmeister/zookeeper
@@ -154,7 +188,6 @@ services:
 #         aliases:
 #           - rmqconsole
 
-# networks:
-#   rmq:
-#     name: rmq
-#     driver: bridge
+networks:
+  dev:
+    driver: bridge

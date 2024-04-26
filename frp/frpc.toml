@@ -1,0 +1,32 @@
+[common]
+#服务器ip
+server_addr = 
+server_port = 
+token = 
+ 
+[mysql]
+name = "mysql"
+type = "tcp"
+local_ip = 
+local_port = 
+remote_port = 
+
+[xiaoya]
+type = https
+local_ip = 
+local_port = 
+subdomain = 
+plugin = https2http
+plugin_local_addr = ${ip:port}
+plugin_host_header_rewrite = ${ip}
+plugin_header_X-From-Where = frp
+plugin_crt_path = ./domain.crt
+plugin_key_path = ./domain.key
+
+
+[domain]
+name = 
+type = "http"
+local_ip = 
+local_port = 
+custom_domains=

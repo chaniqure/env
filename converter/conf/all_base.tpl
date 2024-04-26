@@ -7,15 +7,48 @@ mode: Rule
 log-level: {{ default(global.clash.log_level, "info") }}
 external-controller: :9090
 {% if default(request.clash.dns, "") == "1" %}
-# dns:
-#   enable: true
-#   listen: :1053
 dns:
   enable: true
-  listen: :1053
+  ipv6: false
+  listen: 0.0.0.0:1053
+  # enhanced-mode: fake-ip
+  # fake-ip-range: 198.18.0.1/16
+  # prefer-h3: true
+  use-hosts: true
+  #default-nameserver:
+  #  - 223.5.5.5
+  #  - 223.6.6.6
   nameserver:
     - 223.5.5.5
     - 223.6.6.6
+  # fake-ip-filter:
+  #   - "*.lan"
+  #   - localhost.ptlogin2.qq.com
+  #   - dns.msftncsi.com
+  #   - "*.srv.nintendo.net"
+  #   - "*.stun.playstation.net"
+  #   - xbox.*.microsoft.com
+  #   - "*.xboxlive.com"
+  fallback:
+    - 1.1.1.1
+    - 8.8.8.8
+  fallback-filter:
+    geoip: true
+    geoip-code: CN
+    ipcidr:
+      - 240.0.0.0/4
+# dns:
+#   enable: true
+#   listen: :1053
+#dns:
+#  enable: true
+#  listen: :1053
+#  default-nameserver:
+#    - 223.5.5.5
+#    - 223.6.6.6
+#  nameserver:
+#    - 223.5.5.5
+#    - 223.6.6.6
 #    - tls://dns.alidns.com
 {% endif %}
 {% if local.clash.new_field_name == "true" %}
@@ -32,31 +65,51 @@ Rule: ~
 {% if request.target == "surge" %}
 
 [General]
-bypass-system = true
-skip-proxy = 127.0.0.1,192.168.0.0/16,10.0.0.0/8,172.16.0.0/12,100.64.0.0/10,17.0.0.0/8,localhost,*.local,passenger.t3go.cn
-bypass-tun = 10.0.0.0/8,100.64.0.0/10,127.0.0.0/8,169.254.0.0/16,172.16.0.0/12,192.0.0.0/24,192.0.2.0/24,192.88.99.0/24,192.168.0.0/16,198.18.0.0/15,198.51.100.0/24,203.0.113.0/24,224.0.0.0/4,255.255.255.255/32
-# doh-server = https://dns.alidns.com/dns-query, https://doh.pub/dns-query
-dns-server = 223.5.5.5, 223.6.6.6
-hijack-dns = 8.8.8.8:53, 8.8.4.4:53
+dns-server = 223.5.5.5,223.6.6.6
+encrypted-dns-server = quic://223.5.5.5,quic://223.6.6.6
+ipv6 = false
 loglevel = notify
-replica = false
-tls-provider = default
-show-error-page-for-reject = true
-exclude-simple-hostnames = true
-always-real-ip = *.srv.nintendo.net, *.stun.playstation.net, xbox.*.microsoft.com, *.xboxlive.com, msftconnecttest.com, msftncsi.com, *.msftconnecttest.com, *.msftncsi.com, *.battlenet.com.cn, *.battlenet.com, *.blzstatic.cn, *.battle.net
+skip-proxy = 127.0.0.1, 192.168.0.0/16, 10.0.0.0/8, 172.16.0.0/12, 100.64.0.0/10, localhost, *.local
 internet-test-url = http://www.aliyun.com
 proxy-test-url = http://www.gstatic.com/generate_204
-# iOS Only
+test-timeout = 4
+exclude-simple-hostnames = true
+read-etc-hosts = true
+show-error-page-for-reject = true
+disable-geoip-db-auto-update = true
+http-api-web-dashboard = true
+hijack-dns = *:53
+http-listen = 0.0.0.0
+socks5-listen = 0.0.0.0
 allow-wifi-access = true
+allow-hotspot-access = true
 wifi-access-http-port = 6152
 wifi-access-socks5-port = 6153
-# macOS Only
-http-listen = 0.0.0.0:6152
-socks5-listen = 0.0.0.0:6153
-enhanced-mode-by-rule = false
+external-controller-access = 123456@127.0.0.1:6170
 
 [Script]
 http-request https?:\/\/.*\.iqiyi\.com\/.*authcookie= script-path=https://raw.githubusercontent.com/NobyDa/Script/master/iQIYI-DailyBonus/iQIYI.js
+# 京东签到
+京东多合一签到 = type=cron,cronexp=0 1 */12 * * *,wake-system=1,timeout=600,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/JD-DailyBonus/JD_DailyBonus.js
+# 京东游戏及其他
+#京东价格提醒 = type=cron,cronexp=5 0 * * *,script-path=https://raw.githubusercontent.com/toulanboy/scripts/master/jd_price_detect/jd_price_detect.js,wake-system=true,timeout=600
+京东抽奖机 = type=cron,cronexp=11 0 * * *,wake-system=1,timeout=20,script-path=https://raw.githubusercontent.com/yangtingxiao/QuantumultX/master/scripts/jd/jd_lotteryMachine.js
+京东排行榜 = type=cron,cronexp=0 13 9 * * *,wake-system=1,timeout=20,script-path=https://raw.githubusercontent.com/yangtingxiao/QuantumultX/master/scripts/jd/jd_rankingList.js
+京东白条 = type=cron,cronexp=0 9 * * *, wake-system=1,timeout=10,script-path=https://raw.githubusercontent.com/yangtingxiao/QuantumultX/master/scripts/jd/jd_baiTiao.js
+京东特权值 = type=cron,cronexp=5 8 * * *,wake-system=1,timeout=20,script-path=https://raw.githubusercontent.com/iisams/Scripts/master/liwo/jdtqz.js
+
+# 其他签到
+Bilibili签到 = type=cron,cronexp=10 0 0 * * *,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/bilibili/bilibili.js,script-update-interval=0
+Bilibili银瓜子转硬币 = type=cron,cronexp=10 0 0 * * *,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/bilibili/bilibili.silver2coin.js,script-update-interval=0
+网易云签到 = type=cron,cronexp=10 0 0 * * *,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/neteasemusic/neteasemusic.js,script-update-interval=0
+中国联通签到 = script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/10010/10010.js,type=cron,cronexp=10 0 0 * * *
+爱奇艺签到 = type=cron,cronexp=11 0 * * *,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/iQIYI-DailyBonus/iQIYI.js
+快手极速版签到 = type=cron,cronexp=35 5 0 * * *,script-path=https://raw.githubusercontent.com/Sunert/Scripts/master/Task/kuaishou.js,script-update-interval=0
+机场签到 = type=cron,cronexp=5 0 * * *,wake-system=1,timeout=20,script-path=https://raw.githubusercontent.com/evilbutcher/Quantumult_X/master/check_in/glados/checkin_env.js
+机场签到Cookie版 = type=cron,cronexp=5 0 * * *,wake-system=1,timeout=20,script-path=https://raw.githubusercontent.com/evilbutcher/Quantumult_X/master/check_in/glados/checkincookie_env.js
+吾爱破解 = type=cron,cronexp=5 0 * * *,wake-system=1,timeout=20,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/52pojie-DailyBonus/52pojie.js
+美团 = type=cron,cronexp=3 0 * * *,wake-system=1,timeout=20,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/meituan/meituan.js
+切换会话 = type=cron,cronexp=11 0 * * *,wake-system=1,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/box/switcher/box.switcher.js
 
 [URL Rewrite]
 # AbeamTV Unlock
