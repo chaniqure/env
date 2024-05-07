@@ -54,5 +54,5 @@ custom:
     - {group: "DIRECT", ruleset: "clash-domain:https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/private.txt", interval: 86400}
     - {group: "🚀 节点选择", ruleset: "clash-domain:https://raw.fastgit.ixmu.net/Loyalsoldier/clash-rules/release/tld-not-cn.txt", interval: 86400}
     - {group: "🚀 节点选择", ruleset: "clash-domain:https://raw.fastgit.ixmu.net/Loyalsoldier/clash-rules/release/proxy.txt", interval: 86400}
-    - {group: "🎯 全球直连", rule: "GEOIP,CN"}
+    - {group: "DIRECT", rule: "GEOIP,CN"}
     - {group: "🐟 漏网之鱼", rule: "FINAL"}
