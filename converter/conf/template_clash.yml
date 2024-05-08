@@ -2,7 +2,7 @@ custom:
   enable_rule_generator: true
   overwrite_original_rules: true
   proxy_groups:
-    - {name: "🚀 节点选择", type: select, rule: [ "[]DIRECT", "[]🇭🇰 香港节点", "[]🇨🇳 台湾节点", "[]🇸🇬 狮城节点", "[]🇯🇵 日本节点", "[]🇺🇲 美国节点", "[]DIRECT", ".*" ]}
+    - {name: "🚀 节点选择", type: select, rule: [ "[]DIRECT", "[]🇭🇰 香港节点", "[]🇨🇳 台湾节点", "[]🇸🇬 狮城节点", "[]🇯🇵 日本节点", "[]🇺🇲 美国节点", ".*" ]}
     #- {name: "✅ 手动切换", type: select, rule: [".*"]}
     # - {name: "🧭 负载均衡（轮训）", type: load-balance,strategy: "round-robin", rule: ["(港|HK|Hong Kong)","(台|TW|Taiwan)","(新加坡|狮城|SG|Singapore)","(日本|JP|Japan)"], url: http://www.gstatic.com/generate_204, interval: 60}
     # - {name: "♨ 负载均衡（哈希）", type: load-balance,strategy: "consistent-hashing", rule: ["(港|HK|Hong Kong)","(台|TW|Taiwan)","(新加坡|狮城|SG|Singapore)","(日本|JP|Japan)"], url: http://www.gstatic.com/generate_204, interval: 60}
