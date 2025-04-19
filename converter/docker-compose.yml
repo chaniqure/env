@@ -11,6 +11,5 @@ services:
       - ./conf/config.ini:/app/config.ini
       - ./conf/clash.yml:/app/pkg/conf/subconverter_config/clash.yml
       - ./conf/surge.yml:/app/pkg/conf/subconverter_config/surge.yml
-      - ./conf/ytoo.yml:/app/pkg/conf/subconverter_config/ytoo.yml
       - ./conf/rule.yml:/app/pkg/conf/rule.yml
       - ./conf/all_base.tpl:/app/subconverter/base/all_base.tpl
