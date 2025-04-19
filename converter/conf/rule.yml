@@ -1,82 +1,22 @@
 rule-providers:
-  # BanAD:
-  #   type: http
-  #   behavior: domain
-  #   url: "https://raw.iqiq.io/ACL4SSR/ACL4SSR/master/Clash/Providers/BanAD.yaml"
-  #   path: ./ruleset/BanAD.yaml
-  #   interval: 86400
-  # BanProgramAD:
-  #   type: http
-  #   behavior: domain
-  #   url: "https://raw.iqiq.io/ACL4SSR/ACL4SSR/master/Clash/Providers/BanProgramAD.yaml"
-  #   path: ./ruleset/BanProgramAD.yaml
-  #   interval: 86400
-  # BanEasyList:
-  #   type: http
-  #   behavior: classical
-  #   url: "https://raw.iqiq.io/ACL4SSR/ACL4SSR/master/Clash/Providers/BanEasyList.yaml"
-  #   path: ./ruleset/BanEasyList.yaml
-  #   interval: 86400
-  # BanEasyListChina:
-  #   type: http
-  #   behavior: classical
-  #   url: "https://raw.iqiq.io/ACL4SSR/ACL4SSR/master/Clash/Providers/BanEasyListChina.yaml"
-  #   path: ./ruleset/BanEasyListChina.yaml
-  #   interval: 86400
-  # Download:
-  #   type: http
-  #   behavior: classical
-  #   url: "https://raw.iqiq.io/blackmatrix7/ios_rule_script/master/rule/Clash/Download/Download.yaml"
-  #   path: ./ruleset/Download.yaml
-  #   interval: 86400
-  # AdvertisingLite_Classical:
-  #    type: http
-  #    behavior: classical
-  #    url: "https://fastly.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/AdvertisingLite/AdvertisingLite_Classical.yaml"
-  #    path: ./ruleset/AdvertisingLite_Classical.yaml
-  #    interval: 86400
-  Advertising_Classical:
+  ad:
     type: http
     behavior: classical
-    url: "https://fastly.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/Advertising/Advertising_Classical.yaml"
-    path: ./ruleset/Advertising_Classical.yaml
+    url: "https://fastly.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/AdvertisingLite/AdvertisingLite_Classical_No_Resolve.yaml"
+    path: ./ruleset/ad.yaml
     interval: 86400
-  China_Domain:
+  cn:
     type: http
-    behavior: domain
-    url: "https://fastly.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/China/China_Domain.yaml"
+    behavior: classical
+    url: "https://fastly.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/ChinaMax/ChinaMax_Classical_No_IPv6_No_Resolve.yaml"
     path: ./ruleset/China_Domain.yaml
     interval: 86400
-  ChinaIPs_IP:
-    type: http
-    behavior: ipcidr
-    url: "https://fastly.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/ChinaIPs/ChinaIPs_IP.yaml"
-    path: ./ruleset/ChinaIPs_IP.yaml
-    interval: 86400
-  Global_Classical:
+  proxy:
     type: http
     behavior: classical
-    url: "https://fastly.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/Global/Global_Classical.yaml"
+    url: "https://fastly.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/Global/Global_Classical_No_Resolve.yaml"
     path: ./ruleset/Global_Classical.yaml
     interval: 86400
-  EasyPrivacy_Classical:
-    type: http
-    behavior: classical
-    url: "https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/EasyPrivacy/EasyPrivacy_Classical.yaml"
-    path: ./ruleset/EasyPrivacy_Classical.yaml
-    interval: 86400
-  # OpenAI:
-  #   type: http
-  #   behavior: domain
-  #   url: "https://fastly.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/OpenAI/OpenAI.yaml"
-  #   path: ./ruleset/OpenAI.yaml
-  #   interval: 86400
-  # Google:
-  #   type: http
-  #   behavior: domain
-  #   url: "https://fastly.jsdelivr.net/gh/ACL4SSR/ACL4SSR@master/Clash/Ruleset/Google.list"
-  #   path: ./ruleset/OpenAI.yaml
-  #   interval: 86400
   
 rules:
   - DOMAIN-SUFFIX,amysecure.com,DIRECT
@@ -90,15 +30,10 @@ rules:
   - DOMAIN-SUFFIX,ifconfig.io,DIRECT
   - DOMAIN-SUFFIX,ipinfo.io,DIRECT
   - DOMAIN-SUFFIX,ipify.org,DIRECT
-  - IP-CIDR,150.136.224.46/32,DIRECT
-  - IP-CIDR,193.32.150.170/32,DIRECT
-  - IP-CIDR,195.245.241.22/32,DIRECT
-  #- RULE-SET,OpenAI,🐹 OpenAI
-  - RULE-SET,Advertising_Classical,🛑 广告拦截
-  - RULE-SET,EasyPrivacy_Classical,🛑 广告拦截
-  - RULE-SET,China_Domain,DIRECT
-  - RULE-SET,ChinaIPs_IP,DIRECT
-  - RULE-SET,Global_Classical,🚀 节点选择
+  #- RULE-SET,OpenAI,?? OpenAI
+  - RULE-SET,ad,🛑 广告拦截
+  - RULE-SET,cn,DIRECT
+  - RULE-SET,proxy,🚀 节点选择
   - GEOIP,LAN,DIRECT
   - GEOIP,CN,DIRECT
   - MATCH,🐟 漏网之鱼
